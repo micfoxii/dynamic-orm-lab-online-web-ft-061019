@@ -9,7 +9,7 @@ class InteractiveRecord
     end
 
     def self.column_names
-        
+                
         sql = "PRAGMA table_info('#{table_name}')"
 
         table_info = DB[:conn].execute(sql)
@@ -50,9 +50,18 @@ class InteractiveRecord
     def save
         sql = "INSERT INTO #{table_name_for_insert} (#{col_names_for_insert}) VALUES (#{values_for_insert})"
         DB[:conn].execute(sql)
-        binding.pry
         @id = DB[:conn].execute("SELECT last_insert_rowid() FROM #{table_name_for_insert}")[0][0]
     end
 
-    
+    def self.find_by_name(name)
+        sql = "SELECT * FROM #{self.table_name} WHERE name = '#{name}'"
+        DB[:conn].execute(sql)
+    end
+
+    def self.find_by(attribute_hash)
+        value = attribute_hash.values.first 
+        formatted_value = value.class == Fixnum ? value : "'#{value}'"
+        sql = "SELECT * FROM #{self.table_name} WHERE #{attribute_hash.keys.first} = #{formatted_value}"
+        DB[:conn].execute(sql)
+    end
 end
